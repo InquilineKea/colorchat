@@ -1,154 +1,108 @@
-# BookChat - Git-Backed Messaging Application
+# ColorChat - Git-Backed Messaging Application
 
-A lightweight, Git-backed web-based messaging application that allows users to communicate through a simple interface while maintaining message history in a Git repository.
+A secure, Git-backed chat application with cryptographic message signing and verification.
 
 ## Features
 
-- Simple and intuitive web interface
-- Flexible storage backend (Git or SQLite)
-- Git integration for message history
-- Real-time message updates
-- Basic user authentication
-- Markdown support for messages
-- Serverless-friendly when using Git storage
-- Comprehensive logging system with multiple debug levels
+- Real-time messaging with cryptographic signatures
+- Git-based message storage for transparency and auditability
+- Optional GitHub synchronization
+- Message verification using RSA signatures
+- Dark mode support
+- Responsive design for mobile and desktop
 
-## Tech Stack
+## Quick Start
 
-- Backend: Python (No frameworks)
-- Storage: Git-based JSON files or SQLite database
-- Frontend: HTML, CSS, JavaScript (Vanilla)
-- Version Control: Git (via GitHub API)
-- Authentication: GitHub OAuth
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/colorchat.git
+cd colorchat
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Create a `.env` file with your configuration:
+```bash
+SIGN_MESSAGES=true
+MESSAGE_VERIFICATION=true
+```
+
+4. Run the server:
+```bash
+python3 server.py
+```
+
+5. Open http://localhost:8000 in your browser
+
+## Configuration
+
+Environment variables:
+
+- `COLORCHAT_STORAGE`: Storage backend ('git' or 'sqlite', default: sqlite)
+- `SIGN_MESSAGES`: Enable message signing (true/false)
+- `MESSAGE_VERIFICATION`: Enable signature verification (true/false)
+- `KEYS_DIR`: Directory for key storage
+- `SYNC_TO_GITHUB`: Enable GitHub sync (true/false)
+- `GITHUB_TOKEN`: GitHub personal access token
+- `GITHUB_REPO`: GitHub repository for sync
 
 ## Project Structure
 
 ```
-bookchat/
-├── README.md
-├── .env
-├── static/
-│   ├── css/
-│   │   └── style.css
-│   └── js/
-│       └── main.js
-├── templates/
-│   ├── index.html
-│   └── login.html
-├── storage/
-│   ├── __init__.py
-│   ├── factory.py
-│   ├── git_storage.py
-│   └── sqlite_storage.py
-├── server.py
-└── requirements.txt
+colorchat/
+├── server.py           # Main server file
+├── key_manager.py      # RSA key management
+├── static/            
+│   ├── css/           # Stylesheets
+│   └── js/            # Client-side scripts
+├── templates/         
+│   └── index.html     # Main page template
+└── storage/           # Storage backends
 ```
 
-## Setup Instructions
+## Deployment
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/bookchat.git
-   cd bookchat
-   ```
+ColorChat supports multiple deployment options:
 
-2. Create a virtual environment and activate it:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+1. Local development server (default)
+2. Production server with WSGI
+3. Docker container
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+See `doc/DEPLOYMENT.md` for detailed instructions.
 
-4. Configure storage backend in `.env`:
-   ```bash
-   # Choose storage backend: 'git' or 'sqlite'
-   BOOKCHAT_STORAGE=git
-   
-   # For Git storage
-   REPO_PATH=/path/to/your/repo
-   
-   # For SQLite storage
-   DB_PATH=/path/to/database.db
-   ```
+## Logging
 
-5. Run the server:
-   ```bash
-   python server.py
-   ```
+ColorChat includes a comprehensive logging system with multiple debug levels:
 
-## Deployment Options
+1. ERROR - Critical errors that need immediate attention
+2. WARNING - Important events that are not errors
+3. INFO - General information about system operation
+4. DEBUG - Detailed information for debugging
 
-BookChat supports multiple deployment options:
+To enable debug logging:
 
-### 1. GitHub Pages (Serverless)
-- Use Git storage backend
-- Host static files on GitHub Pages
-- Messages stored directly in the Git repository
-- Perfect for small to medium-sized deployments
+```bash
+export COLORCHAT_DEBUG=true
+```
 
-### 2. Traditional Server
-- Use either Git or SQLite storage
-- Deploy on any Python-compatible hosting platform
-- Suitable for larger deployments with more control
+Or on Windows:
 
-### 3. Serverless Platforms
-- Use Git storage backend
-- Deploy on platforms like Vercel, Netlify, or Cloudflare Pages
-- Great for scalable, maintenance-free deployments
+```cmd
+set COLORCHAT_DEBUG=true
+```
 
-## Logging and Debugging
+## Troubleshooting
 
-BookChat includes a comprehensive logging system with multiple debug levels:
+Common issues and solutions:
 
-### Log Files
+1. Check the logs in the console output
+2. Enable console debug output temporarily using the `COLORCHAT_DEBUG` environment variable
+3. Verify your configuration in `.env`
+4. Check file permissions for the keys directory
 
-All logs are stored in the `logs` directory:
-- `logs/debug.log`: Contains all log messages (DEBUG and above)
-- `logs/info.log`: Contains INFO level and above messages
-- `logs/error.log`: Contains only ERROR and CRITICAL messages
+## License
 
-### Console Output
-
-By default, the console shows only WARNING and above messages to keep the output clean. To enable debug output in the console:
-
-1. Set the environment variable:
-   ```bash
-   export BOOKCHAT_DEBUG=true
-   ```
-
-2. Or add to your `.env` file:
-   ```bash
-   BOOKCHAT_DEBUG=true
-   ```
-
-### Log Levels
-
-The logging system uses standard Python logging levels (from lowest to highest priority):
-- DEBUG: Detailed information for debugging
-- INFO: General operational messages
-- WARNING: Warning messages for potential issues
-- ERROR: Error messages for actual problems
-- CRITICAL: Critical issues that need immediate attention
-
-### Debugging Tips
-
-1. Check the appropriate log file based on the severity of the issue:
-   - For detailed debugging: `logs/debug.log`
-   - For general operation info: `logs/info.log`
-   - For errors and critical issues: `logs/error.log`
-
-2. Enable console debug output temporarily using the `BOOKCHAT_DEBUG` environment variable
-
-3. Log files include detailed information such as:
-   - Timestamp
-   - Log level
-   - Source file and line number
-   - Detailed message
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+MIT License - See LICENSE file for details

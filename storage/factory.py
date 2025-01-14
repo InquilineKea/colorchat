@@ -29,7 +29,7 @@ def create_storage(storage_type: str = None, **kwargs) -> StorageBackend:
         
         # Use environment variable if storage_type not specified
         if storage_type is None:
-            storage_type = os.getenv('BOOKCHAT_STORAGE', 'sqlite').lower()
+            storage_type = os.getenv('COLORCHAT_STORAGE', 'sqlite').lower()
             logger.info(f"Using storage type from environment: {storage_type}")
         
         storage_type = storage_type.lower()

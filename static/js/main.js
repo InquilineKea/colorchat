@@ -92,81 +92,45 @@ function createMessageElement(message) {
     messageDiv.className = 'message';
     messageDiv.dataset.messageId = message.id;
     
-    // Create message header for author and timestamp
+    // Add message content first
+    const content = document.createElement('div');
+    content.textContent = message.content;
+    content.className = 'content';
+    messageDiv.appendChild(content);
+    
+    // Create message header for metadata
     const messageHeader = document.createElement('div');
     messageHeader.className = 'message-header';
-    
-    // Create left section for author and verification status
-    const leftSection = document.createElement('div');
-    leftSection.className = 'header-left';
     
     // Add author name
     const authorSpan = document.createElement('span');
     authorSpan.className = 'author';
     authorSpan.textContent = message.author || 'anonymous';
-    leftSection.appendChild(authorSpan);
     
     // Add verification status if enabled
-    if (messageVerificationEnabled) {
+    if (messageVerificationEnabled && message.verified && message.verified.toLowerCase() === 'true') {
         const verifiedSpan = document.createElement('span');
-        verifiedSpan.className = `verification-status ${message.verified && message.verified.toLowerCase() === 'true' ? 'verified' : 'unverified'}`;
-        verifiedSpan.title = message.verified && message.verified.toLowerCase() === 'true' ? 'Message signature verified' : 'Message not verified';
-        verifiedSpan.textContent = message.verified && message.verified.toLowerCase() === 'true' ? '&#10003;' : '&#33;';
-        leftSection.appendChild(verifiedSpan);
+        verifiedSpan.className = 'verification-status verified';
+        verifiedSpan.title = 'Message signature verified';
+        verifiedSpan.textContent = '✓';
+        authorSpan.appendChild(verifiedSpan);
     }
-    
-    // Create right section for timestamp and commit hash
-    const rightSection = document.createElement('div');
-    rightSection.className = 'header-right';
+    messageHeader.appendChild(authorSpan);
     
     // Add timestamp
     const timestampSpan = document.createElement('span');
     timestampSpan.className = 'timestamp';
     if (message.pending) {
-        timestampSpan.className += ' pending';
         timestampSpan.textContent = 'Sending...';
         timestampSpan.title = 'Message is being sent';
     } else {
-        const messageDate = new Date(message.createdAt);
+        const messageDate = new Date(message.createdAt || message.timestamp);
         timestampSpan.textContent = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         timestampSpan.title = messageDate.toLocaleString();
     }
-    rightSection.appendChild(timestampSpan);
+    messageHeader.appendChild(timestampSpan);
     
-    // Add commit hash with GitHub link if available
-    if (message.commit_hash && message.repo_name) {
-        const commitSpan = document.createElement('span');
-        commitSpan.className = 'commit-hash';
-        const commitLink = document.createElement('a');
-        commitLink.href = `https://github.com/${message.repo_name}/commit/${message.commit_hash}`;
-        commitLink.target = '_blank';
-        commitLink.textContent = message.commit_hash;
-        commitLink.title = 'View commit on GitHub';
-        commitSpan.appendChild(commitLink);
-        rightSection.appendChild(commitSpan);
-    }
-    
-    // Add source file link if available and verification is enabled and not pending
-    if (message.file && messageVerificationEnabled && !message.pending) {
-        const sourceLink = document.createElement('a');
-        sourceLink.className = 'source-link';
-        sourceLink.href = `/messages/${message.file.split('/').pop()}`; // Get just the filename
-        sourceLink.textContent = '&#128273;';
-        sourceLink.title = 'View message source file';
-        sourceLink.target = '_blank'; // Open in new tab
-        rightSection.appendChild(sourceLink);
-    }
-    
-    messageHeader.appendChild(leftSection);
-    messageHeader.appendChild(rightSection);
     messageDiv.appendChild(messageHeader);
-    
-    // Add message content
-    const content = document.createElement('div');
-    content.className = 'content';
-    content.textContent = message.content;
-    messageDiv.appendChild(content);
-    
     return messageDiv;
 }
 
@@ -217,41 +181,28 @@ async function sendMessage(content, type = 'message') {
                 const messageDate = new Date(result.createdAt);
                 timestamp.textContent = messageDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 timestamp.title = messageDate.toLocaleString();
-                timestamp.classList.remove('pending');
             }
             
             // Add verification status if needed
             if (messageVerificationEnabled) {
-                const leftSection = pendingMessage.querySelector('.header-left');
-                const verificationStatus = document.createElement('span');
-                verificationStatus.className = 'verification-status';
-                
-                if (result.verified && result.verified.toLowerCase() === 'true') {
-                    verificationStatus.className += ' verified';
-                    verificationStatus.title = 'Message verified';
-                    verificationStatus.innerHTML = '&#10003;';
-                } else if (result.signature) {
-                    verificationStatus.className += ' pending';
-                    verificationStatus.title = 'Verification pending';
-                    verificationStatus.innerHTML = '&#8943;';
-                } else {
-                    verificationStatus.className += ' unverified';
-                    verificationStatus.title = 'Message not verified';
-                    verificationStatus.innerHTML = '&#33;';
+                const author = pendingMessage.querySelector('.author');
+                if (author) {
+                    const verifiedIcon = document.createElement('span');
+                    verifiedIcon.className = 'verified-icon';
+                    verifiedIcon.textContent = '✓';
+                    author.appendChild(verifiedIcon);
                 }
-                leftSection.insertBefore(verificationStatus, leftSection.firstChild);
             }
             
-            // Add source file link if needed
-            if (result.file && messageVerificationEnabled) {
-                const rightSection = pendingMessage.querySelector('.header-right');
-                const sourceLink = document.createElement('a');
-                sourceLink.className = 'source-link';
-                sourceLink.href = `/messages/${result.file.split('/').pop()}`;
-                sourceLink.textContent = '&#128273;';
-                sourceLink.title = 'View message source file';
-                sourceLink.target = '_blank';
-                rightSection.appendChild(sourceLink);
+            // Add signature if needed
+            if (result.signature) {
+                const meta = pendingMessage.querySelector('.message-meta');
+                if (meta) {
+                    const signature = document.createElement('div');
+                    signature.className = 'message-signature';
+                    signature.textContent = result.signature;
+                    meta.appendChild(signature);
+                }
             }
         }
         
@@ -423,8 +374,8 @@ function updateGlobalVerificationStatus() {
     let anyVerified = false;
     
     messages.forEach(message => {
-        const status = message.querySelector('.verification-status');
-        if (status && status.classList.contains('verified')) {
+        const author = message.querySelector('.author');
+        if (author && author.querySelector('.verified-icon')) {
             anyVerified = true;
         } else {
             allVerified = false;
