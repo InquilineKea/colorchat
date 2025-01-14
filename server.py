@@ -597,6 +597,9 @@ def open_browser(port):
 def main():
     """Start the server."""
     try:
+        # Get port from environment variable (for cloud deployment) or use default
+        port = int(os.environ.get('PORT', 8000))
+        
         # Perform initial archiving using current time
         current_time = datetime.fromisoformat('2025-01-13T09:58:54-05:00')  # Use provided time
         archive_path = storage.archive_old_messages(current_time)
@@ -609,21 +612,16 @@ def main():
                 f"{metrics['total_mb_archived']:.2f}MB"
             )
 
-        # Find available port
-        port = find_available_port()
-        if not port:
-            logger.error("Could not find an available port")
-            return
-
         # Create and configure the HTTP server
         handler = ChatRequestHandler
-        httpd = socketserver.ThreadingTCPServer(("", port), handler)
+        # Listen on all available interfaces for cloud deployment
+        httpd = socketserver.ThreadingTCPServer(("0.0.0.0", port), handler)
         
         logger.info(f"Starting server on port {port}")
-        print(f"Server started at http://localhost:{port}")
+        print(f"Server started on port {port}")
         
-        # Open browser in a separate thread
-        if not os.environ.get('NO_BROWSER'):
+        # Only open browser in development environment
+        if not os.environ.get('NO_BROWSER') and os.environ.get('ENVIRONMENT') == 'development':
             threading.Thread(target=open_browser, args=(port,), daemon=True).start()
         
         # Start server

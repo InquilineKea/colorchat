@@ -1,6 +1,6 @@
 # ColorChat - Git-Backed Messaging Application
 
-A secure, Git-backed chat application with cryptographic message signing and verification.
+A secure, Git-backed chat application with cryptographic message signing and verification, featuring a beautiful space-themed UI.
 
 ## Features
 
@@ -9,9 +9,11 @@ A secure, Git-backed chat application with cryptographic message signing and ver
 - Optional GitHub synchronization
 - Message verification using RSA signatures
 - Dark mode support
+- Space-themed UI with twinkling stars and constellations
+- Rainbow message borders
 - Responsive design for mobile and desktop
 
-## Quick Start
+## Quick Start (Local Development)
 
 1. Clone the repository:
 ```bash
@@ -28,6 +30,7 @@ pip install -r requirements.txt
 ```bash
 SIGN_MESSAGES=true
 MESSAGE_VERIFICATION=true
+ENVIRONMENT=development
 ```
 
 4. Run the server:
@@ -37,10 +40,61 @@ python3 server.py
 
 5. Open http://localhost:8000 in your browser
 
+## Deployment
+
+### Heroku Deployment
+
+1. Install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
+
+2. Create a new Heroku app:
+```bash
+heroku create your-colorchat-app
+```
+
+3. Set environment variables:
+```bash
+heroku config:set SIGN_MESSAGES=true
+heroku config:set MESSAGE_VERIFICATION=true
+heroku config:set ENVIRONMENT=production
+```
+
+4. Deploy to Heroku:
+```bash
+git push heroku main
+```
+
+### Manual Server Deployment
+
+1. Clone the repository on your server:
+```bash
+git clone https://github.com/yourusername/colorchat.git
+cd colorchat
+```
+
+2. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+3. Set up environment variables:
+```bash
+export SIGN_MESSAGES=true
+export MESSAGE_VERIFICATION=true
+export ENVIRONMENT=production
+export PORT=80  # or your preferred port
+```
+
+4. Run with a production server (e.g., using gunicorn):
+```bash
+gunicorn server:app --bind 0.0.0.0:$PORT
+```
+
 ## Configuration
 
 Environment variables:
 
+- `PORT`: Server port (default: 8000)
+- `ENVIRONMENT`: 'development' or 'production'
 - `COLORCHAT_STORAGE`: Storage backend ('git' or 'sqlite', default: sqlite)
 - `SIGN_MESSAGES`: Enable message signing (true/false)
 - `MESSAGE_VERIFICATION`: Enable signature verification (true/false)
@@ -62,16 +116,6 @@ colorchat/
 │   └── index.html     # Main page template
 └── storage/           # Storage backends
 ```
-
-## Deployment
-
-ColorChat supports multiple deployment options:
-
-1. Local development server (default)
-2. Production server with WSGI
-3. Docker container
-
-See `doc/DEPLOYMENT.md` for detailed instructions.
 
 ## Logging
 
